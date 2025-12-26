@@ -11,7 +11,7 @@ import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import defaultdict
+from collections import defaultdict, Counter
 import tensorflow as tf
 
 
@@ -171,7 +171,6 @@ class LanguageAnalyzer:
         for obs_tuple, msg_list in message_map.items():
             if len(msg_list) > 1:
                 # Most common message
-                from collections import Counter
                 counter = Counter(msg_list)
                 most_common_count = counter.most_common(1)[0][1]
                 consistency = most_common_count / len(msg_list)
@@ -194,7 +193,6 @@ class LanguageAnalyzer:
         """
         message_strings = [self.message_to_string(msg) for msg in messages]
         
-        from collections import Counter
         counter = Counter(message_strings)
         total = len(message_strings)
         
@@ -217,7 +215,6 @@ class LanguageAnalyzer:
         """
         message_strings = [self.message_to_string(msg) for msg in messages]
         
-        from collections import Counter
         counter = Counter(message_strings)
         most_common = counter.most_common(top_k)
         

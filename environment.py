@@ -11,6 +11,9 @@ The environment generates random observations and provides a game where:
 import numpy as np
 import tensorflow as tf
 
+# Temperature scaling factor for converting similarities to logits
+SIMILARITY_TEMPERATURE = 10.0
+
 
 class ReferentialGameEnvironment:
     """
@@ -156,7 +159,7 @@ class ReferentialGameEnvironment:
         similarities = self.compute_similarity(prediction, candidates)
         
         # Scale similarities to make them suitable as logits
-        logits = similarities * 10.0  # Temperature scaling
+        logits = similarities * SIMILARITY_TEMPERATURE
         
         # Cross-entropy loss
         loss = tf.keras.losses.sparse_categorical_crossentropy(

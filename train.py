@@ -73,8 +73,6 @@ def train_step(agents, environment, optimizer_speaker, optimizer_listener):
     optimizer_speaker.apply_gradients(zip(speaker_grads, speaker_vars))
     optimizer_listener.apply_gradients(zip(listener_grads, listener_vars))
     
-    del tape
-    
     # Compute metrics
     reward_info = environment.compute_reward(prediction, candidates_embedded, target_idx)
     accuracy = tf.reduce_mean(reward_info['accuracy'])
