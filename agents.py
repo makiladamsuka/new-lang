@@ -83,16 +83,16 @@ class Listener:
         Args:
             vocab_size: Size of vocabulary
             message_length: Length of messages
-            observation_dim: Dimensionality of observations to predict
+            observation_dim: Dimensionality of observations (not used, kept for compatibility)
             hidden_dim: Size of hidden layers
-            embedding_dim: Size of output embeddings
+            embedding_dim: Size of output embeddings (should match Speaker's embedding_dim)
             learning_rate: Learning rate for optimizer
         """
         self.vocab_size = vocab_size
         self.message_length = message_length
         self.observation_dim = observation_dim
         
-        # Build Listener networks
+        # Build Listener networks - output embedding_dim to match Speaker's encoder output
         self.message_interpreter = MessageInterpreter(
             vocab_size, message_length, hidden_dim, embedding_dim
         )
@@ -172,12 +172,12 @@ class CommunicationAgents:
     
     def save_weights(self, filepath):
         """Save agent weights to files."""
-        self.speaker.encoder.save_weights(f"{filepath}_speaker_encoder.h5")
-        self.speaker.message_generator.save_weights(f"{filepath}_speaker_generator.h5")
-        self.listener.message_interpreter.save_weights(f"{filepath}_listener_interpreter.h5")
+        self.speaker.encoder.save_weights(f"{filepath}_speaker_encoder.weights.h5")
+        self.speaker.message_generator.save_weights(f"{filepath}_speaker_generator.weights.h5")
+        self.listener.message_interpreter.save_weights(f"{filepath}_listener_interpreter.weights.h5")
     
     def load_weights(self, filepath):
         """Load agent weights from files."""
-        self.speaker.encoder.load_weights(f"{filepath}_speaker_encoder.h5")
-        self.speaker.message_generator.load_weights(f"{filepath}_speaker_generator.h5")
-        self.listener.message_interpreter.load_weights(f"{filepath}_listener_interpreter.h5")
+        self.speaker.encoder.load_weights(f"{filepath}_speaker_encoder.weights.h5")
+        self.speaker.message_generator.load_weights(f"{filepath}_speaker_generator.weights.h5")
+        self.listener.message_interpreter.load_weights(f"{filepath}_listener_interpreter.weights.h5")

@@ -44,11 +44,24 @@ def train_step(agents, environment, optimizer_speaker, optimizer_listener):
         # Speaker generates message from target observation
         message = agents.speaker.get_message(target, training=True)
         
-        # Listener interprets message
+        # Listener interprets message to get prediction (embedding)
         prediction = agents.listener.interpret_message(message)
         
-        # Compute loss
-        loss = environment.compute_loss(prediction, candidates, target_idx)
+        # Encode all candidates to embeddings for comparison
+        batch_size = tf.shape(candidates)[0]
+        num_candidates = tf.shape(candidates)[1]
+        # Reshape candidates from [batch, num_candidates, obs_dim] to [batch*num_candidates, obs_dim]
+        candidates_flat = tf.reshape(candidates, [-1, tf.shape(candidates)[-1]])
+        # Encode candidates
+        candidates_encoded = agents.speaker.encoder(candidates_flat)
+        # Reshape back to [batch, num_candidates, embedding_dim]
+        candidates_embedded = tf.reshape(
+            candidates_encoded, 
+            [batch_size, num_candidates, tf.shape(candidates_encoded)[-1]]
+        )
+        
+        # Compute loss using embeddings
+        loss = environment.compute_loss(prediction, candidates_embedded, target_idx)
     
     # Compute gradients and update
     speaker_vars = agents.speaker.get_trainable_variables()
@@ -63,7 +76,7 @@ def train_step(agents, environment, optimizer_speaker, optimizer_listener):
     del tape
     
     # Compute metrics
-    reward_info = environment.compute_reward(prediction, candidates, target_idx)
+    reward_info = environment.compute_reward(prediction, candidates_embedded, target_idx)
     accuracy = tf.reduce_mean(reward_info['accuracy'])
     
     return {
@@ -100,8 +113,16 @@ def evaluate(agents, environment, num_episodes=100):
         message = agents.speaker.get_message(target, training=False)
         prediction = agents.listener.interpret_message(message)
         
+        # Encode candidates for comparison
+        candidates_flat = tf.reshape(candidates, [-1, tf.shape(candidates)[-1]])
+        candidates_encoded = agents.speaker.encoder(candidates_flat)
+        candidates_embedded = tf.reshape(
+            candidates_encoded,
+            [1, tf.shape(candidates)[1], tf.shape(candidates_encoded)[-1]]
+        )
+        
         # Compute accuracy
-        reward_info = environment.compute_reward(prediction, candidates, target_idx)
+        reward_info = environment.compute_reward(prediction, candidates_embedded, target_idx)
         accuracies.append(reward_info['accuracy'].numpy()[0])
         
         all_observations.append(target.numpy()[0])
